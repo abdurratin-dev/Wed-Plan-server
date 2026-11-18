@@ -14,7 +14,8 @@ export async function connectToMongoDB() {
 }
 
 const clientConnectionPromise = await connectToMongoDB();
-const db = clientConnectionPromise.db('WedPlan');
+const db = client.db('WedPlan');
 export const weddingServices = db.collection('WeddingServices');
 export const bookings = db.collection('Bookings');
-export const users = db.collection('');
+export const users = db.collection('user');
+export const sessions = db.collection('session');
