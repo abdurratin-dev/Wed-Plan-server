@@ -19,9 +19,9 @@ serviceRouter.get("/", async (req, res) => {
     if (req.query.location) {
       quary.location = req.query.location;
     }
-    // if (req.query.search) {
-    //   quary.name = { $regx: req.query.search, $option: "i" };
-    // }
+    if (req.query.search) {
+      quary.name = { $regex: req.query.search, $options: "i" };
+    }
   }
   const data = weddingServices.find(quary);
   const result = await data.toArray();
