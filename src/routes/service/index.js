@@ -13,6 +13,17 @@ serviceRouter.post("/", checkAuthenticatedUser, async (req, res) => {
 serviceRouter.get("/", async (req, res) => {
   const quary = {};
   if (req.query) {
+    if(req.query.role){
+      if(req.query.role === 'vendor'){
+        const filterService = await weddingServices.find({vendorId : req.query.userId}).toArray();
+        if(!filterService){
+          res.send([{status : 401, massage: "user unauthoraizd" }]);
+          return
+        }
+        res.send(filterService);
+        return
+      }
+    }
     if (req.query.category) {
       quary.category = req.query.category;
     }
