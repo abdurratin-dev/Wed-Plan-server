@@ -16,4 +16,6 @@ export const env = {
   MONGODB_URI,
   // Frontend origin allowed by CORS.
   CLIENT_URL: process.env.CLIENT_URL || "http://localhost:3000",
+  STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
 };

@@ -19,3 +19,5 @@ export const weddingServices = db.collection('WeddingServices');
 export const bookings = db.collection('Bookings');
 export const users = db.collection('user');
 export const sessions = db.collection('session');
+export const subscriptions = db.collection('subscriptions')
+export const subscriptionService = db.collection('services')
