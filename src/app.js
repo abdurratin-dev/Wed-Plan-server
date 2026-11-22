@@ -3,7 +3,7 @@ import cors from "cors";
 import router from "./routes/index.js";
 import { notFound } from "./middleware/notFound.js";
 import { errorHandler } from "./middleware/errorHandler.js";
-import { subscriptions } from "./config/db.js";
+import { bookings, subscriptions } from "./config/db.js";
 import { stripe } from "./config/stripe.js";
 import { ObjectId } from "mongodb";
 import "dotenv/config";
@@ -46,10 +46,18 @@ app.post(
         session.metadata?.bookingId,
       );
       // Update the booking status in the database.
-      await subscriptions.updateOne(
-        { _id: new ObjectId(session.metadata?.bookingId) },
-        { $set: { status: "confirmed", subscriptionStatus: "subscribed" } },
-      );
+      if (session.metadata?.mode === "payment") {
+        await bookings.updateOne(
+          { _id: new ObjectId(session.metadata?.bookingId) },
+          { $set: { bookingStatus: "Confirmed", paymentStatus: "paid" } },
+        );
+      }
+      if (session.metadata?.mode === "subscription") {
+        await subscriptions.updateOne(
+          { _id: new ObjectId(session.metadata?.bookingId) },
+          { $set: { status: "confirmed", subscriptionStatus: "subscribed" } },
+        );
+      }
     }
 
     // step-4: Acknowledge receipt. Without a response Stripe times out and retries.

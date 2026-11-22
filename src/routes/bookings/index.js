@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { checkAuthenticatedUser } from "../../middleware/auth.js";
 import { bookings, users, weddingServices } from "../../config/db.js";
+import { stripe } from "../../config/stripe.js";
 import { ObjectId } from "mongodb";
 
 const bookingsRouter = Router();
@@ -15,7 +16,45 @@ bookingsRouter.post("/", checkAuthenticatedUser, async (req, res) => {
     res.send({ success: false, massage: "You already book this service" });
     return;
   }
+  const query = { _id: new ObjectId(data.bookingsId) };
+  const service = await weddingServices.findOne(query);
+  console.log(typeof data.bookingsId, data.bookingsId, service);
+  if (!service) {
+    res.send({ mssage: "service not found" });
+    return;
+  }
   const result = await bookings.insertOne(data);
+  const session = await stripe.checkout.sessions.create({
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: service.name,
+            description: service.description,
+          },
+
+          unit_amount: parseInt(service.price * 100),
+        },
+        quantity: 1,
+      },
+    ],
+    success_url: `${process.env.CLIENT_URL}/vendor/subscription/success?bookingId=${result.insertedId.toString()}`,
+    cancel_url: `${process.env.CLIENT_URL}/vendor/subscription/cancel`,
+    mode: "payment",
+    metadata: {
+      bookingId: result.insertedId.toString(),
+      userId: data.customerId,
+      mode: "payment",
+    },
+  });
+  res.send({
+    success: true,
+    message: "Checkout session created",
+    data: {
+      redirectUrl: session.url,
+    },
+  });
   res.send(result);
 });
 
@@ -70,7 +109,7 @@ bookingsRouter.get("/", checkAuthenticatedUser, async (req, res) => {
         .find({ customerId: userId, quary })
         .toArray();
       res.send(bookingsData);
-      return
+      return;
     }
   }
   const data = await bookings.find(quary).toArray();

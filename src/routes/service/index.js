@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { checkAuthenticatedUser } from "../../middleware/auth.js";
 import { weddingServices } from "../../config/db.js";
+import { ObjectId } from "mongodb";
 
 const serviceRouter = Router();
 
@@ -38,4 +39,11 @@ serviceRouter.get("/", async (req, res) => {
   const result = await data.toArray();
   res.send(result);
 });
+
+serviceRouter.get('/:id',async(req,res)=>{
+  const id = req.params.id;
+  const query = {_id : new ObjectId(id)}
+  const data = await weddingServices.findOne(query);
+  res.send(data)
+})
 export default serviceRouter;

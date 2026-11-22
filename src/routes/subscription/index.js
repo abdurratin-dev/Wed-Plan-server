@@ -62,6 +62,7 @@ subscriptionRouter.post(
       metadata: {
         bookingId: createSubscriptionResult.insertedId.toString(),
         userId: payload.userId,
+        mode : "subscription"
       },
     });
     res.send({
