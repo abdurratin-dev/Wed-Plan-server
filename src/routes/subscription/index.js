@@ -56,8 +56,8 @@ subscriptionRouter.post(
           quantity: 1,
         },
       ],
-      success_url: `${process.env.CLIENT_URL}/vendor/subscription/success?bookingId=${createSubscriptionResult.insertedId.toString()}`,
-      cancel_url: `${process.env.CLIENT_URL}/vendor/subscription/cancel`,
+      success_url: `${process.env.CLIENT_URL}/dashboard/vendor/subscription/success?bookingId=${createSubscriptionResult.insertedId.toString()}`,
+      cancel_url: `${process.env.CLIENT_URL}/dashboard/vendor/subscription/cancel`,
       mode: "subscription",
       metadata: {
         bookingId: createSubscriptionResult.insertedId.toString(),

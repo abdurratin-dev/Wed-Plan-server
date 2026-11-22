@@ -11,6 +11,7 @@ bookingsRouter.post("/", checkAuthenticatedUser, async (req, res) => {
   const oldData = await bookings.findOne({
     customerId: data.customerId,
     bookingsId: data.bookingsId,
+    paymentStatus: "paid",
   });
   if (oldData) {
     res.send({ success: false, massage: "You already book this service" });
@@ -23,6 +24,7 @@ bookingsRouter.post("/", checkAuthenticatedUser, async (req, res) => {
     res.send({ mssage: "service not found" });
     return;
   }
+
   const result = await bookings.insertOne(data);
   const session = await stripe.checkout.sessions.create({
     line_items: [
@@ -39,8 +41,8 @@ bookingsRouter.post("/", checkAuthenticatedUser, async (req, res) => {
         quantity: 1,
       },
     ],
-    success_url: `${process.env.CLIENT_URL}/vendor/subscription/success?bookingId=${result.insertedId.toString()}`,
-    cancel_url: `${process.env.CLIENT_URL}/vendor/subscription/cancel`,
+    success_url: `${process.env.CLIENT_URL}/payments/success?bookingId=${result.insertedId.toString()}`,
+    cancel_url: `${process.env.CLIENT_URL}/payments/cancel`,
     mode: "payment",
     metadata: {
       bookingId: result.insertedId.toString(),
@@ -55,7 +57,6 @@ bookingsRouter.post("/", checkAuthenticatedUser, async (req, res) => {
       redirectUrl: session.url,
     },
   });
-  res.send(result);
 });
 
 bookingsRouter.get("/", checkAuthenticatedUser, async (req, res) => {
