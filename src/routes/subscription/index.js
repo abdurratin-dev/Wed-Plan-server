@@ -30,9 +30,9 @@ subscriptionRouter.post(
     const subscriptionCollection = {
       serviceID: payload.serviceID,
       email: payload.email,
-      status: "pending",
-      paymentStatus: "unpaid",
-      time: new Date().toISOString(),
+      status: 'pending',
+      subscriptionStatus: "unsubscribe",
+      subscriptionAt: new Date().toISOString(),
     };
 
     const createSubscriptionResult = await subscriptions.insertOne(
