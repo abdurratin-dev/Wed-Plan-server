@@ -14,15 +14,17 @@ serviceRouter.post("/", checkAuthenticatedUser, async (req, res) => {
 serviceRouter.get("/", async (req, res) => {
   const quary = {};
   if (req.query) {
-    if(req.query.role){
-      if(req.query.role === 'vendor'){
-        const filterService = await weddingServices.find({vendorId : req.query.userId}).toArray();
-        if(!filterService){
-          res.send([{status : 401, massage: "user unauthoraizd" }]);
-          return
+    if (req.query.role) {
+      if (req.query.role === "vendor") {
+        const filterService = await weddingServices
+          .find({ vendorId: req.query.userId })
+          .toArray();
+        if (!filterService) {
+          res.send([{ status: 401, massage: "user unauthoraizd" }]);
+          return;
         }
         res.send(filterService);
-        return
+        return;
       }
     }
     if (req.query.category) {
@@ -40,10 +42,28 @@ serviceRouter.get("/", async (req, res) => {
   res.send(result);
 });
 
-serviceRouter.get('/:id',async(req,res)=>{
+serviceRouter.get("/:id", async (req, res) => {
   const id = req.params.id;
-  const query = {_id : new ObjectId(id)}
+  const query = { _id: new ObjectId(id) };
   const data = await weddingServices.findOne(query);
-  res.send(data)
-})
+  res.send(data);
+});
+
+serviceRouter.patch("/", async (req, res) => {
+  const body = req.body;
+  const query = { _id: new ObjectId(body.id) };
+  const updateDocument = {
+    $set: {
+      name: body.name,
+      category : body.category,
+      description: body.description,
+      price: body.price,
+      location : body.location,
+      imageUrl : body.imageUrl,
+      status : body.status,
+    },
+  };
+  const rsult = await weddingServices.updateOne(query,updateDocument)
+  res.send(rsult)
+});
 export default serviceRouter;
