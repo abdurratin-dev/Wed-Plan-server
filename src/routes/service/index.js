@@ -60,8 +60,7 @@ serviceRouter.patch("/", async (req, res) => {
       price: body.price,
       location : body.location,
       imageUrl : body.imageUrl,
-      status : body.status,
-    },
+      status : body.status,},
   };
   const rsult = await weddingServices.updateOne(query,updateDocument)
   res.send(rsult)
