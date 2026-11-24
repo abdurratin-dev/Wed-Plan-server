@@ -21,3 +21,4 @@ export const users = db.collection('user');
 export const sessions = db.collection('session');
 export const subscriptions = db.collection('subscriptions')
 export const subscriptionService = db.collection('services')
+export const bookingTransactions = db.collection("BookingTransactions")

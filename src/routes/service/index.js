@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { checkAuthenticatedUser } from "../../middleware/auth.js";
+import { chackVendorAndAdmin, checkAuthenticatedUser } from "../../middleware/auth.js";
 import { weddingServices } from "../../config/db.js";
 import { ObjectId } from "mongodb";
 
 const serviceRouter = Router();
 
-serviceRouter.post("/", checkAuthenticatedUser, async (req, res) => {
+serviceRouter.post("/", checkAuthenticatedUser,chackVendorAndAdmin, async (req, res) => {
   const data = req.body;
   const result = await weddingServices.insertOne(data);
   res.send(result);
@@ -49,7 +49,7 @@ serviceRouter.get("/:id", async (req, res) => {
   res.send(data);
 });
 
-serviceRouter.patch("/", async (req, res) => {
+serviceRouter.patch("/",checkAuthenticatedUser,chackVendorAndAdmin, async (req, res) => {
   const body = req.body;
   const query = { _id: new ObjectId(body.id) };
   const updateDocument = {
@@ -65,4 +65,12 @@ serviceRouter.patch("/", async (req, res) => {
   const rsult = await weddingServices.updateOne(query,updateDocument)
   res.send(rsult)
 });
+
+serviceRouter.delete('/',chackVendorAndAdmin,checkAuthenticatedUser,async(req,res)=>{
+  const data = req.query
+  console.log(data);
+  const query = {_id : new ObjectId(data.id)}
+  const result = await weddingServices.deleteOne(query)
+  res.send(result)
+})
 export default serviceRouter;

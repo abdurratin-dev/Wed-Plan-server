@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { checkAuthenticatedUser } from "../../middleware/auth.js";
-import { bookings, users, weddingServices } from "../../config/db.js";
+import { chackVendorAndAdmin, checkAuthenticatedUser } from "../../middleware/auth.js";
+import { bookings, bookingTransactions, users, weddingServices } from "../../config/db.js";
 import { stripe } from "../../config/stripe.js";
 import { ObjectId } from "mongodb";
 
@@ -19,13 +19,19 @@ bookingsRouter.post("/", checkAuthenticatedUser, async (req, res) => {
   }
   const query = { _id: new ObjectId(data.bookingsId) };
   const service = await weddingServices.findOne(query);
-  console.log(typeof data.bookingsId, data.bookingsId, service);
   if (!service) {
     res.send({ mssage: "service not found" });
     return;
   }
 
   const result = await bookings.insertOne(data);
+  const creatTransactions = await bookingTransactions.insertOne({
+    bookingId : result.insertedId.toString(),
+    customerEmail : data.customerEmail,
+    price : data.bookingsPrice,
+    status: "pending",
+    paymentStatus : "unpaid"
+  })
   const session = await stripe.checkout.sessions.create({
     line_items: [
       {
@@ -41,11 +47,12 @@ bookingsRouter.post("/", checkAuthenticatedUser, async (req, res) => {
         quantity: 1,
       },
     ],
-    success_url: `${process.env.CLIENT_URL}/payments/success?bookingId=${result.insertedId.toString()}`,
+    success_url: `${process.env.CLIENT_URL}/payments/success?bookingId=${creatTransactions.insertedId.toString()}`,
     cancel_url: `${process.env.CLIENT_URL}/payments/cancel`,
     mode: "payment",
     metadata: {
       bookingId: result.insertedId.toString(),
+      transactionId : creatTransactions.insertedId.toString(),
       userId: data.customerId,
       mode: "payment",
     },
@@ -88,7 +95,7 @@ bookingsRouter.get("/", checkAuthenticatedUser, async (req, res) => {
         bookingsData.push(...bookingsById);
       }
       if (bookingsData.length === 0) {
-        res.send([{ status: 401, massage: "user unauthoraizd" }]);
+        res.send({ success : false , massage : "bookings empty"});
         return;
       }
       res.send(bookingsData);
@@ -96,18 +103,8 @@ bookingsRouter.get("/", checkAuthenticatedUser, async (req, res) => {
     }
     if (req.query.role === "customer") {
       const userId = req.query.userId;
-      if (req.query.status) {
-        quary.bookingStatus = req.query.status;
-      }
-      if (req.query.search) {
-        quary.$or = [
-          { bookingTitle: { $regex: req.query.search, $options: "i" } },
-          { bookingsCategory: { $regex: req.query.search, $options: "i" } },
-          { bookingsLocation: { $regex: req.query.search, $options: "i" } },
-        ];
-      }
       const bookingsData = await bookings
-        .find({ customerId: userId, quary })
+        .find({ customerId: userId })
         .toArray();
       res.send(bookingsData);
       return;
@@ -117,11 +114,16 @@ bookingsRouter.get("/", checkAuthenticatedUser, async (req, res) => {
   res.send(data);
 });
 
-bookingsRouter.patch("/", checkAuthenticatedUser, async (req, res) => {
+bookingsRouter.patch("/", checkAuthenticatedUser,chackVendorAndAdmin, async (req, res) => {
   const body = req.body;
   const quary = { _id: new ObjectId(body.id) };
   const update = { $set: { bookingStatus: body.bookingStatus } };
   const result = await bookings.updateOne(quary, update);
   res.send(result);
 });
+
+bookingsRouter.get('/transactions',checkAuthenticatedUser,chackVendorAndAdmin,async(req,res)=>{
+  const data = await bookingTransactions.find().toArray()
+  res.send(data)
+})
 export default bookingsRouter;

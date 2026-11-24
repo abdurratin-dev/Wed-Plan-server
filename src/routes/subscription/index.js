@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { subscriptions, subscriptionService } from "../../config/db.js";
 import { stripe } from "../../config/stripe.js";
-import { checkAuthenticatedUser } from "../../middleware/auth.js";
+import { chackVendorAndAdmin, checkAuthenticatedUser } from "../../middleware/auth.js";
 import { ObjectId } from "mongodb";
 
 const subscriptionRouter = Router();
@@ -18,6 +18,7 @@ subscriptionRouter.get(
 subscriptionRouter.post(
   "/create-checkout-session",
   checkAuthenticatedUser,
+  chackVendorAndAdmin,
   async (req, res) => {
     const payload = req.body;
     const service = await subscriptionService.findOne({
@@ -65,6 +66,7 @@ subscriptionRouter.post(
         mode : "subscription"
       },
     });
+    console.log(session.metadata);
     res.send({
       success: true,
       message: "Checkout session created",

@@ -3,7 +3,12 @@ import cors from "cors";
 import router from "./routes/index.js";
 import { notFound } from "./middleware/notFound.js";
 import { errorHandler } from "./middleware/errorHandler.js";
-import { bookings, subscriptions } from "./config/db.js";
+import {
+  bookings,
+  bookingTransactions,
+  subscriptions,
+  users,
+} from "./config/db.js";
 import { stripe } from "./config/stripe.js";
 import { ObjectId } from "mongodb";
 import "dotenv/config";
@@ -51,15 +56,28 @@ app.post(
           { _id: new ObjectId(session.metadata?.bookingId) },
           { $set: { bookingStatus: "Confirmed", paymentStatus: "paid" } },
         );
+        await bookingTransactions.updateOne(
+          { _id: new ObjectId(session.metadata.transactionId) },
+          { $set: { status: "success", paymentStatus: "paid" } },
+        );
       }
       if (session.metadata?.mode === "subscription") {
         await subscriptions.updateOne(
           { _id: new ObjectId(session.metadata?.bookingId) },
           { $set: { status: "confirmed", subscriptionStatus: "subscribed" } },
         );
+        const res = await users.updateOne(
+          { _id: new ObjectId(session.metadata?.userId) },
+          { $set: { premium: true } },
+        );
       }
     }
 
+    console.log("Webhook API Triggered");
+
+    console.log("Signature:", !!signature);
+
+    console.log("Raw Body:", Buffer.isBuffer(req.body));
     // step-4: Acknowledge receipt. Without a response Stripe times out and retries.
     res.json({ received: true });
   },
