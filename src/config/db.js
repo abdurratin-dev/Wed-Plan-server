@@ -3,7 +3,7 @@ import { env } from "./env.js";
 
 export const DB_NAME = "WedPlan";
 
-const client = new MongoClient(env.DB_URI);
+const client = new MongoClient(env.MONGODB_URI);
 let db = client.db(DB_NAME);
 
 export async function connectDB() {

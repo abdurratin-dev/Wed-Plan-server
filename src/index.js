@@ -1,7 +1,6 @@
-import 'dotenv/config'
 import app from './app.js';
 import { closeDB, connectDB } from './config/db.js';
-const PORT = process.env.PORT || 5000
+import { env } from './config/env.js';
 
 async function start() {
   try {
