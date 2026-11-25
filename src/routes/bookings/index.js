@@ -77,7 +77,7 @@ bookingsRouter.get("/", checkAuthenticatedUser, async (req, res) => {
           _id: new ObjectId(bookingsid),
         });
         if (findService.vendorId !== userId && req.query.role !== "admin") {
-          res.send([{ status: 401, massage: "user unauthoraizd" }]);
+          res.send({ status: 401, massage: "user unauthoraizd" });
           return;
         }
       }
