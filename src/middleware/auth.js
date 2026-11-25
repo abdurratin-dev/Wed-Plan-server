@@ -16,7 +16,7 @@ export const checkAuthenticatedUser = async (req, res, next) => {
   }
 
   const JWKS = createRemoteJWKSet(
-    new URL("http://localhost:3000/api/auth/jwks"),
+    new URL(`${env.CLIENT_URL}/api/auth/jwks`),
   );
   const { payload } = await jwtVerify(jwtToken, JWKS);
   const query = { _id: new ObjectId(payload.id) };
@@ -41,7 +41,7 @@ export const chackAdmin = async (req, res, next) => {
   }
 
   const JWKS = createRemoteJWKSet(
-    new URL("http://localhost:3000/api/auth/jwks"),
+    new URL(`${env.CLIENT_URL}/api/auth/jwks`),
   );
   const { payload } = await jwtVerify(jwtToken, JWKS);
   const query = { _id: new ObjectId(payload.id) };
@@ -70,7 +70,7 @@ export const chackVendorAndAdmin = async (req, res, next) => {
   }
 
   const JWKS = createRemoteJWKSet(
-    new URL("http://localhost:3000/api/auth/jwks"),
+    new URL(`${env.CLIENT_URL}/api/auth/jwks`),
   );
   const { payload } = await jwtVerify(jwtToken, JWKS);
   const query = { _id: new ObjectId(payload.id) };
