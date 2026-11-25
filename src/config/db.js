@@ -1,20 +1,18 @@
 import { MongoClient } from "mongodb";
 import { env } from "./env.js";
 
-const client = new MongoClient(env.MONGODB_URI);
+export const DB_NAME = "WedPlan";
 
-export async function connectToMongoDB() {
-  try {
-    await client.connect();
-    console.log("You successfully connected to MongoDB!");
-    return client;
-  } catch (err) {
-    console.dir(err);
-  }
+const client = new MongoClient(env.DB_URI);
+let db = client.db(DB_NAME);
+
+export async function connectDB() {
+  await client.connect();
+  db = client.db(DB_NAME);
+  await db.command({ ping: 1 });
+  return db;
 }
 
-const clientConnectionPromise = await connectToMongoDB();
-const db = client.db('WedPlan');
 export const weddingServices = db.collection('WeddingServices');
 export const bookings = db.collection('Bookings');
 export const users = db.collection('user');
@@ -22,3 +20,7 @@ export const sessions = db.collection('session');
 export const subscriptions = db.collection('subscriptions')
 export const subscriptionService = db.collection('services')
 export const bookingTransactions = db.collection("BookingTransactions")
+
+export async function closeDB() {
+  await client.close();
+}
