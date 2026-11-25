@@ -1,26 +1,35 @@
 import { MongoClient } from "mongodb";
 import { env } from "./env.js";
 
-export const DB_NAME = "WedPlan";
+const uri = env.MONGODB_URI;
 
-const client = new MongoClient(env.MONGODB_URI);
-let db = client.db(DB_NAME);
-
-export async function connectDB() {
-  await client.connect();
-  db = client.db(DB_NAME);
-  await db.command({ ping: 1 });
-  return db;
+if (!uri) {
+  throw new Error("MONGODB_URI is missing");
 }
 
-export const weddingServices = db.collection('WeddingServices');
-export const bookings = db.collection('Bookings');
-export const users = db.collection('user');
-export const sessions = db.collection('session');
-export const subscriptions = db.collection('subscriptions')
-export const subscriptionService = db.collection('services')
-export const bookingTransactions = db.collection("BookingTransactions")
+const options = {};
 
-export async function closeDB() {
-  await client.close();
+let client;
+let clientPromise;
+
+if (process.env.NODE_ENV === "development") {
+  if (!global._mongoClientPromise) {
+    client = new MongoClient(uri, options);
+    global._mongoClientPromise = client.connect();
+  }
+
+  clientPromise = global._mongoClientPromise;
+} else {
+  client = new MongoClient(uri, options);
+  clientPromise = client.connect();
 }
+
+const connectionDb = await clientPromise;
+const db = connectionDb.db("WedPlan");
+export const weddingServices = db.collection("WeddingServices");
+export const bookings = db.collection("Bookings");
+export const users = db.collection("user");
+export const sessions = db.collection("session");
+export const subscriptions = db.collection("subscriptions");
+export const subscriptionService = db.collection("services");
+export const bookingTransactions = db.collection("BookingTransactions");
