@@ -42,7 +42,7 @@ bookingsRouter.post("/", checkAuthenticatedUser, async (req, res) => {
             description: service.description,
           },
 
-          unit_amount: parseInt(service.price * 100),
+          unit_amount: parseInt(service.price * 0.0080 * 100),
         },
         quantity: 1,
       },
