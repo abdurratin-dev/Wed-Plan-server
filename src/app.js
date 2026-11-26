@@ -19,14 +19,30 @@ const app = express();
 app.post(
   "/api/webhooks/stripe",
   async (req, res) => {
-
     const signature = req.headers["stripe-signature"];
+
+    let rawBody;
+
+    try {
+      if (Buffer.isBuffer(req.body)) {
+        rawBody = req.body;
+      } else {
+        const chunks = [];
+        for await (const chunk of req) {
+          chunks.push(chunk);
+        }
+        rawBody = Buffer.concat(chunks).toString("utf8");
+      }
+    } catch (err) {
+      console.error("Failed to get raw body:", err);
+      return res.status(400).send("Failed to read request body");
+    }
 
     // step-2: Verify the signature so only genuine Stripe events are accepted.
     let event;
     try {
       event = stripe.webhooks.constructEvent(
-        req.body,
+        rawBody,
         signature,
         process.env.STRIPE_WEBHOOK_SECRET,
       );
