@@ -19,27 +19,16 @@ clientPromise = global._mongoClientPromise;
 // Database এবং Collection পাওয়ার ফাংশন
 export async function getCollection() {
   const client = await clientPromise;
-  const db = client.db();
+  const db = client.db("WedPlan");
   return db
 }
 
-export let weddingServices;
-export let bookings;
-export let users;
-export let sessions;
-export let subscriptions;
-export let subscriptionService;
-export let bookingTransactions;
+const db = await getCollection();
+export const weddingServices = db.collection("WeddingServices");
+export const bookings = db.collection("Bookings");
+export const users = db.collection("user");
+export const sessions = db.collection("session");
+export const subscriptions = db.collection("subscriptions");
+export const subscriptionService = db.collection("services");
+export const bookingTransactions = db.collection("BookingTransactions");
 
-async function initCollections() {
-  const { db } = await getCollection();
-  weddingServices = db.collection("WeddingServices");
-  bookings = db.collection("Bookings");
-  users = db.collection("user");
-  sessions = db.collection("session");
-  subscriptions = db.collection("subscriptions");
-  subscriptionService = db.collection("services");
-  bookingTransactions = db.collection("BookingTransactions");
-}
-
-initCollections().catch(console.error);

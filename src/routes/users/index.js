@@ -10,6 +10,11 @@ usersRouter.get('/',checkAuthenticatedUser,chackAdmin,async(req,res)=>{
     res.send(data)
 })
 
+usersRouter.get('/:id',checkAuthenticatedUser,async(req,res)=>{
+    const id = req.params.id
+    const data = await users.findOne({_id : new ObjectId(id)})
+    res.send(data)
+})
 usersRouter.patch('/',checkAuthenticatedUser,chackAdmin,async(req,res)=>{
     const data = req.body
     const query = {_id : new ObjectId(data.id)}
