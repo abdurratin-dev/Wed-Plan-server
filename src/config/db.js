@@ -23,8 +23,3 @@ export const sessions = db.collection("session");
 export const subscriptions = db.collection("subscriptions");
 export const subscriptionService = db.collection("services");
 export const bookingTransactions = db.collection("BookingTransactions");
-
-// Call this only when your application terminates
-export async function disconnectFromMongoDB() {
-  await client.close();
-}
