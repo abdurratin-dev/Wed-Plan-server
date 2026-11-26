@@ -18,20 +18,15 @@ const app = express();
 
 app.post(
   "/api/webhooks/stripe",
-  express.raw({ type: "application/json" }),
   async (req, res) => {
-    // After payment, Stripe sends an event here.
 
-    // step-1: Get the raw event body and Stripe's signature header.
-    // req.body is a Buffer (from express.raw above); constructEvent needs it unparsed.
-    const stripeEvent = req.body;
     const signature = req.headers["stripe-signature"];
 
     // step-2: Verify the signature so only genuine Stripe events are accepted.
     let event;
     try {
       event = stripe.webhooks.constructEvent(
-        stripeEvent,
+        req.body,
         signature,
         process.env.STRIPE_WEBHOOK_SECRET,
       );
