@@ -6,23 +6,21 @@ const options = {
   minPoolSize: 5, 
 };
 
-let cachedClient = null;
-let cachedDb = null;
+let client;
+let clientPromise;
 
-export async function connectToDatabase() {
-  if (cachedClient && cachedDb) {
-    return { client: cachedClient, db: cachedDb };
-  }
+// Vercel এর জন্য Global Cache প্যাটার্ন
+if (!global._mongoClientPromise) {
+  client = new MongoClient(env.MONGODB_URI, options);
+  global._mongoClientPromise = client.connect();
+}
+clientPromise = global._mongoClientPromise;
 
-  const client = new MongoClient(env.MONGODB_URI, options);
-  await client.connect();
-
-  const db = client.db("WedPlan");
-
-  cachedClient = client;
-  cachedDb = db;
-
-  return { client, db };
+// Database এবং Collection পাওয়ার ফাংশন
+export async function getCollection() {
+  const client = await clientPromise;
+  const db = client.db();
+  return db
 }
 
 export let weddingServices;
@@ -34,7 +32,7 @@ export let subscriptionService;
 export let bookingTransactions;
 
 async function initCollections() {
-  const { db } = await connectToDatabase();
+  const { db } = await getCollection();
   weddingServices = db.collection("WeddingServices");
   bookings = db.collection("Bookings");
   users = db.collection("user");
