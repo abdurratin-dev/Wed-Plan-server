@@ -17,7 +17,7 @@ export async function connectToDatabase() {
   const client = new MongoClient(env.MONGODB_URI, options);
   await client.connect();
 
-  const db = client.db("wed-plan");
+  const db = client.db("WedPlan");
 
   cachedClient = client;
   cachedDb = db;
@@ -25,23 +25,12 @@ export async function connectToDatabase() {
   return { client, db };
 }
 
-export let weddingServices;
-export let bookings;
-export let users;
-export let sessions;
-export let subscriptions;
-export let subscriptionService;
-export let bookingTransactions;
+const { db } = await connectToDatabase();
+export const weddingServices = db.collection("WeddingServices");
+export const  bookings = db.collection("Bookings");
+export const  users = db.collection("user");
+export const  sessions = db.collection("session");
+export const  subscriptions = db.collection("subscriptions");
+export const  subscriptionService = db.collection("services");
+export const  bookingTransactions = db.collection("BookingTransactions");
 
-async function initCollections() {
-  const { db } = await connectToDatabase();
-  weddingServices = db.collection("WeddingServices");
-  bookings = db.collection("Bookings");
-  users = db.collection("user");
-  sessions = db.collection("session");
-  subscriptions = db.collection("subscriptions");
-  subscriptionService = db.collection("services");
-  bookingTransactions = db.collection("BookingTransactions");
-}
-
-initCollections().catch(console.error);
