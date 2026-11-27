@@ -1,17 +1,12 @@
 import { MongoClient } from "mongodb";
 import { env } from "./env.js";
 
-const options = {
-  maxPoolSize: 10, 
-  minPoolSize: 5, 
-};
-
 let client;
 let clientPromise;
 
 // Vercel এর জন্য Global Cache প্যাটার্ন
 if (!global._mongoClientPromise) {
-  client = new MongoClient(env.MONGODB_URI, options);
+  client = new MongoClient(env.MONGODB_URI);
   global._mongoClientPromise = client.connect();
 }
 clientPromise = global._mongoClientPromise;
